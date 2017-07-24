@@ -11,6 +11,7 @@ import io.realm.annotations.PrimaryKey;
 public class WeatherResult extends RealmObject {
 
     public static final String KEY_ID = "id";
+    public static final String SEARCH_ID = "name";
 
     @SerializedName("coord")
     private Coord coord;
@@ -45,6 +46,8 @@ public class WeatherResult extends RealmObject {
 
     @SerializedName("cod")
     private Long cod;
+
+    private Long updateTime;
 
     public Coord getCoord() {
         return coord;
@@ -137,4 +140,11 @@ public class WeatherResult extends RealmObject {
         this.cod = cod;
     }
 
+    public Long getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Long updateTime) {
+        this.updateTime = updateTime;
+    }
 }

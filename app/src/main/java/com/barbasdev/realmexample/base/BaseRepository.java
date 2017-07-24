@@ -12,11 +12,11 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Created by Edu on 24/07/2017.
  */
 
-public class BaseApiClient<T> {
+public class BaseRepository<T> {
 
     protected T apiService;
 
-    public BaseApiClient(String url, Class serviceClass) {
+    public BaseRepository(String url, Class serviceClass) {
         OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
         if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();

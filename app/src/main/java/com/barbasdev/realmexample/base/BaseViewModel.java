@@ -1,8 +1,10 @@
 package com.barbasdev.realmexample.base;
 
+import android.databinding.BaseObservable;
+
 /**
  * Created by Edu on 23/07/2017.
  */
 
-public class BaseViewModel {
+public class BaseViewModel extends BaseObservable {
 }

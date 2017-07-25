@@ -28,7 +28,7 @@ public class WeatherActivity extends BaseActivity {
     }
 
     private void doBinding() {
-        viewModel = new WeatherViewModel();                                             // TODO: inject this instance using Dagger
+        viewModel = new WeatherViewModel();             // TODO: inject this instance using Dagger
         binding.setViewModel(viewModel);
     }
 }

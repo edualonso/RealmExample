@@ -12,7 +12,6 @@ public class Weather extends RealmObject {
     private Long id;
 
     @SerializedName("main")
-
     private String main;
 
     @SerializedName("description")

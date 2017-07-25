@@ -17,31 +17,20 @@
         tools:context="com.barbasdev.realmexample.WeatherActivity">
 
         <Button
-            android:id="@+id/buttonSave"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:onClick="@{() -> viewModel.onRefreshClicked()}"
-            android:text="REFRESH"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <Button
             android:id="@+id/buttonQuery"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:onClick="@{() -> viewModel.onQueryClicked()}"
-            android:text="QUERY"
+            android:onClick="@{() -> viewModel.onGetWeatherClicked()}"
+            android:text="GET WEATHER"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/buttonSave" />
+            app:layout_constraintRight_toRightOf="parent" />
 
         <Button
-            android:id="@+id/buttonUpdate"
+            android:id="@+id/buttonDelete"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:onClick="@{() -> viewModel.onUpdateClicked()}"
-            android:text="UPDATE"
+            android:onClick="@{() -> viewModel.onDeleteWeatherClicked()}"
+            android:text="DELETE WEATHER"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/buttonQuery" />
@@ -50,7 +39,10 @@
             android:id="@+id/text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Hello World!"
+            android:gravity="center"
+            android:padding="40dp"
+            android:text="@{viewModel.text}"
+            android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent" />

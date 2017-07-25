@@ -16,9 +16,6 @@ public class WeatherApplication extends Application {
         super.onCreate();
 
         Realm.init(this);
-        RealmConfiguration config = new RealmConfiguration.Builder()
-                .inMemory()
-                .build();
-        Realm.setDefaultConfiguration(config);
+        Realm.setDefaultConfiguration( new RealmConfiguration.Builder().build());
     }
 }

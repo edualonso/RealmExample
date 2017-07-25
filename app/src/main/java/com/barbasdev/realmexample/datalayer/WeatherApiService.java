@@ -1,4 +1,4 @@
-package com.barbasdev.realmexample.network;
+package com.barbasdev.realmexample.datalayer;
 
 import com.barbasdev.realmexample.datamodel.WeatherResult;
 
@@ -11,11 +11,6 @@ import retrofit2.http.Query;
  */
 
 public interface WeatherApiService {
-
-    // http://samples.openweathermap.org/data/2.5/weather?
-    //  q=London,uk&
-    //  appid=b1b15e88fa797225412429c1c50c122a1
-
     @GET("weather")
     Observable<WeatherResult> getWeather(@Query("appid") String appId, @Query("q") String query);
 }

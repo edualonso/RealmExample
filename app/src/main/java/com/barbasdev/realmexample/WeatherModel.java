@@ -1,19 +1,19 @@
 package com.barbasdev.realmexample;
 
-import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.barbasdev.realmexample.datalayer.RealmWeatherRepository;
 import com.barbasdev.realmexample.datamodel.WeatherResult;
-import com.barbasdev.realmexample.network.WeatherRepository;
-import com.barbasdev.realmexample.persistence.RealmHelper;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
-import io.realm.RealmChangeListener;
 
 /**
  * Created by Edu on 24/07/2017.
@@ -23,93 +23,72 @@ public class WeatherModel {
 
     private static final String TAG = "WeatherModel";
 
-    private final WeatherRepository weatherRepository;
+    private final RealmWeatherRepository weatherRepository;
 
-    // TODO: consider using the repository pattern
-    public WeatherModel() {
-        weatherRepository = new WeatherRepository(WeatherRepository.URL);
+    private WeatherViewModel weatherViewModel;
+    private SimpleDateFormat simpleDateFormat;
+
+    public WeatherModel(WeatherViewModel weatherViewModel) {
+        this.weatherViewModel = weatherViewModel;
+        weatherRepository = new RealmWeatherRepository(RealmWeatherRepository.URL);
+        simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault());
     }
 
-    public void queryWeather() {
-//        Realm realm = RealmHelper.getRealmInstance(Thread.currentThread().getId());
-//        WeatherResult weatherResult = realm.where(WeatherResult.class).equalTo(WeatherResult.KEY_ID, WEATHER_RESULT_ID).findFirst();
-//
-//        Log.e(TAG, "Thread: " + Thread.currentThread().getName() + ", query. Name: " + weatherResult.getName());
+    public void getWeather() {
+        weatherRepository.getWeather("Copenhagen")
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<WeatherResult>() {
+                    @Override
+                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@io.reactivex.annotations.NonNull WeatherResult weatherResult) {
+                        Long updateTime = weatherResult.getUpdateTime();
+
+                        Date date = new Date(updateTime);
+                        String updateString = simpleDateFormat.format(date);
+                        Log.d(TAG, "--------> updated on: " + updateString);
+
+                        weatherViewModel.setText(String.format("Last update was at\n%s", updateString));
+                    }
+
+                    @Override
+                    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 
-    public void refreshWeather() {
-//        Log.e(TAG, "Thread: " + Thread.currentThread().getName());
-//
-//        weatherRepository.getWeather("Copenhagen")
-//                .subscribeOn(Schedulers.io())
-//                .map(new Function<WeatherResult, Boolean>() {
-//                    @Override
-//                    public Boolean apply(@NonNull WeatherResult weatherResult) throws Exception {
-//                        Log.e(TAG, "Thread: " + Thread.currentThread().getName() + ", result received. Name: " + weatherResult.getName());
-//
-//                        try {
-//                            Realm realm = RealmHelper.getRealmInstance(Thread.currentThread().getId());
-//                            realm.beginTransaction();
-//                            realm.copyToRealmOrUpdate(weatherResult);
-//                            realm.commitTransaction();
-//
-//                            Log.e(TAG, "Thread: " + Thread.currentThread().getName() + ", result saved.");
-//                        } catch (Exception e) {
-//                            return false;
-//                        }
-//
-//                        return true;
-//                    }
-//                })
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Observer<Boolean>() {
-//                    @Override
-//                    public void onSubscribe(@NonNull Disposable d) {
-//                        Log.e(TAG, "onSubscribe");
-//                    }
-//
-//                    @Override
-//                    public void onNext(@NonNull Boolean aBoolean) {
-//                        Log.e(TAG, "Thread: " + Thread.currentThread().getName() + ", adding change listener");
-//
-//                        if (aBoolean) {
-//                            Realm realm = RealmHelper.getRealmInstance(Thread.currentThread().getId());
-//                            WeatherResult result = realm.where(WeatherResult.class).equalTo(WeatherResult.KEY_ID, WEATHER_RESULT_ID).findFirst();
-//                            result.removeAllChangeListeners();
-//                            result.addChangeListener(changeListener);
-//                        } else {
-//                            Log.e(TAG, "Thread: " + Thread.currentThread().getName() + ", something went wrong...");
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onError(@NonNull Throwable e) {
-//                        Log.e(TAG, "onError; " + e.getMessage());
-//                    }
-//
-//                    @Override
-//                    public void onComplete() {
-//                        Log.e(TAG, "onComplete");
-//                    }
-//                });
-    }
+    public void deleteWeather() {
+        weatherRepository.deleteWeather()
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Observer<Object>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
 
-    public void updateWeather() {
-//        Log.e(TAG, "Thread: " + Thread.currentThread().getName() + ", updating weather...");
-//
-//        Realm realm = RealmHelper.getRealmInstance(Thread.currentThread().getId());
-//        realm.beginTransaction();
-//        WeatherResult result = realm.where(WeatherResult.class).equalTo(WeatherResult.KEY_ID, WEATHER_RESULT_ID).findFirst();
-//
-//        result.setName("MUAHAHAHAHA");
-//        realm.copyToRealmOrUpdate(result);
-//        realm.commitTransaction();
-    }
+                    }
 
-    private RealmChangeListener<WeatherResult> changeListener = new RealmChangeListener<WeatherResult>() {
-        @Override
-        public void onChange(WeatherResult weatherResult) {
-            Log.e(TAG, "Thread: " + Thread.currentThread().getName() + ", object updated. Name: " + weatherResult.getName());
-        }
-    };
+                    @Override
+                    public void onNext(@NonNull Object o) {
+                        weatherViewModel.setText("DATA DELETED");
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
 }

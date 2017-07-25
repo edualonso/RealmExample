@@ -1,8 +1,7 @@
 package com.barbasdev.realmexample.datamodel;
 
+import com.barbasdev.realmexample.datalayer.RealmWeatherRepository;
 import com.google.gson.annotations.SerializedName;
-
-import java.util.List;
 
 import io.realm.RealmList;
 import io.realm.RealmObject;
@@ -17,7 +16,7 @@ public class WeatherResult extends RealmObject {
     private Coord coord;
 
     @SerializedName("weather")
-    private RealmList<Weather> weather = new RealmList<>();
+    private RealmList<Weather> weather;
 
     @SerializedName("base")
     private String base;
@@ -57,15 +56,12 @@ public class WeatherResult extends RealmObject {
         this.coord = coord;
     }
 
-    public List<Weather> getWeather() {
+    public RealmList<Weather> getWeather() {
         return weather;
     }
 
-    public void setWeather(List<Weather> weather) {
-        this.weather.clear();
-        for (Weather w : weather)  {
-            this.weather.add(w);
-        }
+    public void setWeather(RealmList<Weather> weather) {
+        this.weather = weather;
     }
 
     public String getBase() {
@@ -146,5 +142,10 @@ public class WeatherResult extends RealmObject {
 
     public void setUpdateTime(Long updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public boolean isUsable() {
+        long now = System.currentTimeMillis();
+        return now < updateTime + RealmWeatherRepository.CACHE_LIFESPAN_MS;
     }
 }

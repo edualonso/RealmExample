@@ -7,8 +7,6 @@ import com.barbasdev.realmexample.datamodel.WeatherResult;
 import com.barbasdev.realmexample.persistence.RealmHelper;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
@@ -26,7 +24,7 @@ public class RealmWeatherRepository extends BaseRepository<WeatherApiService> im
 
     public static final String URL = "http://api.openweathermap.org/data/2.5/";
 
-    public static final long CACHE_LIFESPAN_MS = 10000;
+    public static final long CACHE_LIFESPAN_MS = 5000;
 
     private static final String TAG = "RealmWeatherRepository";
     private static final String API_KEY = "75805b09ea06260c9eb71391b785f444";
@@ -60,21 +58,16 @@ public class RealmWeatherRepository extends BaseRepository<WeatherApiService> im
     }
 
     /**
-     * Deletes all weather data present in the database.
+     * Deletes all weather data present in the database. It's executed on the main thread.
+     * No need to close realm!
      */
     @Override
-    public Observable<Void> deleteWeather() {
-        return Observable
-                .create(new ObservableOnSubscribe<Void>() {
-                    @Override
-                    public void subscribe(@NonNull ObservableEmitter<Void> aVoid) throws Exception {
-                        Realm realm = RealmHelper.getRealmInstance(Thread.currentThread().getId());
-                        realm.beginTransaction();
-                        realm.delete(WeatherResult.class);
-                        realm.commitTransaction();
-                        Log.d(TAG, "Thread: " + Thread.currentThread().getName() + ", deleted all data");
-                    }
-                });
+    public void deleteWeather() {
+        Realm realm = RealmHelper.getRealmInstance(Thread.currentThread().getId());
+        realm.beginTransaction();
+        realm.delete(WeatherResult.class);
+        realm.commitTransaction();
+        Log.d(TAG, "Thread: " + Thread.currentThread().getName() + ", deleted all data");
     }
 
     private Observable<WeatherResult> queryDataStore(String query) {
@@ -88,9 +81,15 @@ public class RealmWeatherRepository extends BaseRepository<WeatherApiService> im
         }
     }
 
+    /**
+     * It's executed on the main thread. No need to close realm!
+     * @param query
+     * @return
+     */
     private WeatherResult queryWeather(String query) {
         Realm realm = RealmHelper.getRealmInstance(Thread.currentThread().getId());
-        return realm.where(WeatherResult.class).equalTo(WeatherResult.SEARCH_ID, query).findFirst();
+        WeatherResult firstResult = realm.where(WeatherResult.class).equalTo(WeatherResult.SEARCH_ID, query).findFirst();
+        return firstResult;
     }
 
     private Observable<WeatherResult> queryApiWithSave(String query) {
@@ -129,11 +128,16 @@ public class RealmWeatherRepository extends BaseRepository<WeatherApiService> im
                 });
     }
 
+    /**
+     * It's executed on an IO thread. Remember to close realm once done!
+     * @param weatherResult
+     */
     private void saveToDisk(WeatherResult weatherResult) {
         Realm realm = RealmHelper.getRealmInstance(Thread.currentThread().getId());
         realm.beginTransaction();
         realm.copyToRealmOrUpdate(weatherResult);
         realm.commitTransaction();
+        RealmHelper.closeRealmInstance(Thread.currentThread().getId());
         Log.d(TAG, "Thread: " + Thread.currentThread().getName() + ", result saved.");
     }
 

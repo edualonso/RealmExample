@@ -22,9 +22,11 @@ public class RealmHelper {
         return realm;
     }
 
-    public static void closeRealmInstances() {
-        for (Realm realm : realmInstances.values()) {
+    public static void closeRealmInstance(long threadId) {
+        Realm realm = realmInstances.get(threadId);
+        if (realm != null && !realm.isClosed()) {
             realm.close();
         }
+        realmInstances.remove(threadId);
     }
 }

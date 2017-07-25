@@ -24,7 +24,7 @@ public class WeatherActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        RealmHelper.closeRealmInstances();
+        RealmHelper.closeRealmInstance(Thread.currentThread().getId());
     }
 
     private void doBinding() {

@@ -10,7 +10,7 @@ public class Wind extends RealmObject {
     private Float speed;
 
     @SerializedName("deg")
-    private Long deg;
+    private Float deg;
 
     public Float getSpeed() {
         return speed;
@@ -20,11 +20,11 @@ public class Wind extends RealmObject {
         this.speed = speed;
     }
 
-    public Long getDeg() {
+    public Float getDeg() {
         return deg;
     }
 
-    public void setDeg(Long deg) {
+    public void setDeg(Float deg) {
         this.deg = deg;
     }
 

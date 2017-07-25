@@ -12,7 +12,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Created by Edu on 24/07/2017.
  */
 
-public class BaseRepository<T> {
+public abstract class BaseRepository<T> {
 
     protected T apiService;
 

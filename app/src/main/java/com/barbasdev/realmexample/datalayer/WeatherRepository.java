@@ -10,5 +10,5 @@ import io.reactivex.Observable;
 
 public interface WeatherRepository {
     Observable<WeatherResult> getWeather(String query);
-    Observable<Void> deleteWeather();
+    void deleteWeather();
 }

@@ -11,9 +11,7 @@ import java.util.Locale;
 
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by Edu on 24/07/2017.
@@ -35,7 +33,7 @@ public class WeatherModel {
     }
 
     public void getWeather() {
-        weatherRepository.getWeather("Copenhagen")
+        weatherRepository.getWeather("Madrid")
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<WeatherResult>() {
                     @Override
@@ -56,7 +54,7 @@ public class WeatherModel {
 
                     @Override
                     public void onError(@io.reactivex.annotations.NonNull Throwable e) {
-
+                        weatherViewModel.setText(String.format("Error: %s", e.getMessage()));
                     }
 
                     @Override
@@ -67,28 +65,7 @@ public class WeatherModel {
     }
 
     public void deleteWeather() {
-        weatherRepository.deleteWeather()
-                .subscribeOn(Schedulers.io())
-                .subscribe(new Observer<Object>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-
-                    }
-
-                    @Override
-                    public void onNext(@NonNull Object o) {
-                        weatherViewModel.setText("DATA DELETED");
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
+        weatherRepository.deleteWeather();
+        weatherViewModel.setText("DATA DELETED");
     }
 }

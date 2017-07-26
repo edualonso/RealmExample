@@ -7,4 +7,11 @@ import android.databinding.BaseObservable;
  */
 
 public class BaseViewModel extends BaseObservable {
+
+    /**
+     * Override in children classes.
+     */
+    public void onDestroy() {
+
+    }
 }

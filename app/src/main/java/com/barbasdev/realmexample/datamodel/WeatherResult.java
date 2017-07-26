@@ -145,6 +145,9 @@ public class WeatherResult extends RealmObject {
     }
 
     public boolean isUsable() {
+        if (updateTime == null) {
+            return false;
+        }
         long now = System.currentTimeMillis();
         return now < updateTime + RealmWeatherRepository.CACHE_LIFESPAN_MS;
     }

@@ -17,17 +17,20 @@ public class WeatherActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        doBinding();
+        setupViewModel();
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         RealmHelper.closeRealmInstance(Thread.currentThread().getId());
+        viewModel.onDestroy();
+
+        super.onDestroy();
     }
 
-    private void doBinding() {
+    private void setupViewModel() {
         viewModel = new WeatherViewModel();             // TODO: inject this instance using Dagger
         binding.setViewModel(viewModel);
     }

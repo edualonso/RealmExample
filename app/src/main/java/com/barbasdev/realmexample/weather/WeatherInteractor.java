@@ -1,4 +1,4 @@
-package com.barbasdev.realmexample;
+package com.barbasdev.realmexample.weather;
 
 import android.util.Log;
 

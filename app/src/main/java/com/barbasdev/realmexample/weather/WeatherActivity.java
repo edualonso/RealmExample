@@ -1,8 +1,9 @@
-package com.barbasdev.realmexample;
+package com.barbasdev.realmexample.weather;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 
+import com.barbasdev.realmexample.R;
 import com.barbasdev.realmexample.base.BaseActivity;
 import com.barbasdev.realmexample.databinding.ActivityMainBinding;
 import com.barbasdev.realmexample.persistence.RealmHelper;
@@ -31,7 +32,7 @@ public class WeatherActivity extends BaseActivity {
     }
 
     private void setupViewModel() {
-        viewModel = new WeatherViewModel();             // TODO: inject this instance using Dagger
+        viewModel = new WeatherViewModel(this);             // TODO: inject this instance using Dagger
         binding.setViewModel(viewModel);
     }
 }

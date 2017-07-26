@@ -7,14 +7,14 @@
 
         <variable
             name="viewModel"
-            type="com.barbasdev.realmexample.WeatherViewModel" />
+            type="com.barbasdev.realmexample.weather.WeatherViewModel" />
     </data>
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="8dp"
-        tools:context="com.barbasdev.realmexample.WeatherActivity">
+        tools:context="com.barbasdev.realmexample.weather.WeatherActivity">
 
         <Button
             android:id="@+id/buttonQuery"
@@ -34,6 +34,16 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/buttonQuery" />
+
+        <Button
+            android:id="@+id/buttonExit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:onClick="@{() -> viewModel.onExitClicked()}"
+            android:text="EXIT"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/buttonDelete" />
 
         <TextView
             android:id="@+id/text"

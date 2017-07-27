@@ -2,9 +2,9 @@ package com.barbasdev.realmexample.weather;
 
 import android.util.Log;
 
-import com.barbasdev.realmexample.datalayer.MemoryWeatherRepository;
-import com.barbasdev.realmexample.datalayer.WeatherRepository;
-import com.barbasdev.realmexample.datamodel.WeatherResult;
+import com.barbasdev.realmexample.BuildConfig;
+import com.barbasdev.realmexample.weather.repository.WeatherRepository;
+import com.barbasdev.realmexample.weather.datamodel.WeatherResult;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -19,44 +19,45 @@ import io.reactivex.disposables.Disposable;
  * Created by Edu on 24/07/2017.
  */
 
-public class WeatherInteractor {
-
-    public interface Contract {
-        void setText(String text);
-    }
+public class WeatherInteractor implements WeatherContracts.Interactor {
 
     private static final String TAG = "WeatherInteractor";
 
     private final WeatherRepository weatherRepository;
 
-    private Contract weatherContract;
+    private WeatherContracts.ViewModelCallback viewModelCallback;
     private SimpleDateFormat simpleDateFormat;
     private Disposable getWeatherDisposable;
 
-    public WeatherInteractor(Contract weatherContract) {
-        this.weatherContract = weatherContract;
-//        weatherRepository = new RealmWeatherRepository(WeatherRepository.URL);
-        weatherRepository = new MemoryWeatherRepository(WeatherRepository.URL);
+    @SuppressWarnings("WrongConstant")
+    public WeatherInteractor(WeatherContracts.ViewModelCallback viewModelCallback) {
+        this.viewModelCallback = viewModelCallback;
+        weatherRepository = WeatherRepository.Factory.build(BuildConfig.REPOSITORY);
         simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault());
     }
 
-    public void getWeather() {
-        weatherContract.setText("LOADING...");
-        weatherRepository.getWeather("Madrid")
+    @Override
+    public void getWeather(String query) {
+        viewModelCallback.setText("LOADING...");
+        weatherRepository.getWeather(query)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(getWeatherObserver);
     }
 
+    @Override
     public void deleteWeather() {
         weatherRepository.deleteWeather();
-        weatherContract.setText("DATA DELETED");
+        viewModelCallback.setText("DATA DELETED");
     }
 
-    public void disposeAll() {
-        if (getWeatherDisposable.isDisposed()) {
-            return;
+    @Override
+    public void dispose() {
+        if (getWeatherDisposable != null) {
+            if (getWeatherDisposable.isDisposed()) {
+                return;
+            }
+            getWeatherDisposable.dispose();
         }
-        getWeatherDisposable.dispose();
     }
 
     private Observer<WeatherResult> getWeatherObserver = new Observer<WeatherResult>() {
@@ -73,12 +74,12 @@ public class WeatherInteractor {
             String updateString = simpleDateFormat.format(date);
             Log.d(TAG, "--------> updated on: " + updateString);
 
-            weatherContract.setText(String.format("Last update was at\n%s", updateString));
+            viewModelCallback.setText(String.format("Last update was at\n%s", updateString));
         }
 
         @Override
         public void onError(@NonNull Throwable e) {
-            weatherContract.setText(String.format("Error: %s", e.getMessage()));
+            viewModelCallback.setText(String.format("Error: %s", e.getMessage()));
         }
 
         @Override

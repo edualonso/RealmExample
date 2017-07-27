@@ -3,16 +3,14 @@ package com.barbasdev.realmexample.weather;
 import android.databinding.Bindable;
 
 import com.barbasdev.realmexample.BR;
-import com.barbasdev.realmexample.base.BaseActivity;
 import com.barbasdev.realmexample.base.BaseViewModel;
-
-import java.lang.ref.WeakReference;
 
 /**
  * Created by Edu on 23/07/2017.
  */
 
-public class WeatherViewModel extends BaseViewModel implements WeatherInteractor.Contract {
+public class WeatherViewModel extends BaseViewModel
+        implements WeatherContracts.ViewModel, WeatherContracts.ViewModelCallback {
 
     private static final String TAG = "WeatherViewModel";
 
@@ -21,15 +19,15 @@ public class WeatherViewModel extends BaseViewModel implements WeatherInteractor
 
     private String text;
 
-    public WeatherViewModel(BaseActivity activity) {
-        interactor = new WeatherInteractor(this);
-        router = new WeatherRouter(activity);
+    public WeatherViewModel(WeatherRouter router) {
+        this.interactor = new WeatherInteractor(this);
+        this.router = router;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        interactor.disposeAll();
+        interactor.dispose();
     }
 
     @Bindable
@@ -43,8 +41,12 @@ public class WeatherViewModel extends BaseViewModel implements WeatherInteractor
         notifyPropertyChanged(BR.text);
     }
 
-    public void onGetWeatherClicked() {
-        interactor.getWeather();
+    public void onGetWeatherSimpleClicked() {
+        interactor.getWeather("Madrid");
+    }
+
+    public void onGetWeatherComplexClicked() {
+        interactor.getWeather("Madrid, Spain");
     }
 
     public void onDeleteWeatherClicked() {

@@ -1,6 +1,6 @@
-package com.barbasdev.realmexample.datalayer;
+package com.barbasdev.realmexample.weather.network;
 
-import com.barbasdev.realmexample.datamodel.WeatherResult;
+import com.barbasdev.realmexample.weather.datamodel.WeatherResult;
 
 import io.reactivex.Observable;
 import retrofit2.http.GET;

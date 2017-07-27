@@ -1,4 +1,4 @@
-package com.barbasdev.realmexample.weather;
+package com.barbasdev.realmexample.base;
 
 import android.app.Application;
 
@@ -9,7 +9,7 @@ import io.realm.RealmConfiguration;
  * Created by Edu on 23/07/2017.
  */
 
-public class WeatherApplication extends Application {
+public class BaseApplication extends Application {
 
     @Override
     public void onCreate() {

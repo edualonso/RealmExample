@@ -5,21 +5,21 @@ import android.os.Bundle;
 
 import com.barbasdev.realmexample.R;
 import com.barbasdev.realmexample.base.BaseActivity;
-import com.barbasdev.realmexample.databinding.ActivityMainBinding;
+import com.barbasdev.realmexample.databinding.ActivityWeatherBinding;
 import com.barbasdev.realmexample.persistence.RealmHelper;
 
 public class WeatherActivity extends BaseActivity {
 
     private static final String TAG = "WeatherActivity";
 
-    private ActivityMainBinding binding;
+    private ActivityWeatherBinding binding;
     private WeatherViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_weather);
         setupViewModel();
     }
 
@@ -32,7 +32,7 @@ public class WeatherActivity extends BaseActivity {
     }
 
     private void setupViewModel() {
-        viewModel = new WeatherViewModel(this);             // TODO: inject this instance using Dagger
+        viewModel = new WeatherViewModel(new WeatherRouter(this));             // TODO: inject this instance using Dagger
         binding.setViewModel(viewModel);
     }
 }

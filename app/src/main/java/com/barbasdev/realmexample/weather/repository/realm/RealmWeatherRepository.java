@@ -1,9 +1,12 @@
-package com.barbasdev.realmexample.datalayer;
+package com.barbasdev.realmexample.weather.repository.realm;
 
 import android.util.Log;
 
-import com.barbasdev.realmexample.datamodel.WeatherResult;
 import com.barbasdev.realmexample.persistence.RealmHelper;
+import com.barbasdev.realmexample.weather.datamodel.WeatherResult;
+import com.barbasdev.realmexample.weather.repository.WeatherRepository;
+
+import java.util.Locale;
 
 import io.reactivex.Observable;
 import io.realm.Realm;
@@ -23,10 +26,12 @@ public class RealmWeatherRepository extends WeatherRepository {
     protected Observable<WeatherResult> queryDataStore(String query) {
         WeatherResult weatherResultRealmProxy = queryWeather(query);
         if (weatherResultRealmProxy != null) {
-            Log.d(TAG, "Thread: " + Thread.currentThread().getName() + ", queryDataStore: successful with update time " + weatherResultRealmProxy.getUpdateTime());
+            String message = String.format(Locale.getDefault(), "Thread: %s, queryDataStore: successful with update time %d", Thread.currentThread().getName(), weatherResultRealmProxy.getUpdateTime());
+            Log.d(TAG, message);
             return Observable.just(weatherResultRealmProxy);
         } else {
-            Log.d(TAG, "Thread: " + Thread.currentThread().getName() + ", queryDataStore: got no result");
+            String message = String.format(Locale.getDefault(), "Thread: %s, queryDataStore: got no result", Thread.currentThread().getName());
+            Log.d(TAG, message);
             return Observable.empty();
         }
     }
@@ -38,7 +43,9 @@ public class RealmWeatherRepository extends WeatherRepository {
         realm.copyToRealmOrUpdate(weatherResult);
         realm.commitTransaction();
         RealmHelper.closeRealmInstance(Thread.currentThread().getId());
-        Log.d(TAG, "Thread: " + Thread.currentThread().getName() + ", result saved.");
+
+        String message = String.format(Locale.getDefault(), "Thread: %s, result saved.", Thread.currentThread().getName());
+        Log.d(TAG, message);
     }
 
     @Override
@@ -47,7 +54,9 @@ public class RealmWeatherRepository extends WeatherRepository {
         realm.beginTransaction();
         realm.delete(WeatherResult.class);
         realm.commitTransaction();
-        Log.d(TAG, "Thread: " + Thread.currentThread().getName() + ", deleted all data");
+
+        String message = String.format(Locale.getDefault(), "Thread: %s, deleted all data.", Thread.currentThread().getName());
+        Log.d(TAG, message);
     }
 
     /**

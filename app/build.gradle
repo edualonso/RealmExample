@@ -4,22 +4,35 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'realm-android'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.0"
+
+    compileSdkVersion rootProject.compile_sdk_version
+    buildToolsVersion rootProject.build_tools_version
+
     defaultConfig {
         applicationId "com.barbasdev.realmexample"
-        minSdkVersion 16
-        targetSdkVersion 26
+        minSdkVersion rootProject.minsdk_version
+        targetSdkVersion rootProject.targetsdk_version
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    productFlavors {
+        memoryRepository {
+            buildConfigField "String", "REPOSITORY", "com.barbasdev.realmexample.weather.repository.WeatherRepository.Factory.TYPE_MEMORY"
+        }
+        realmRepository {
+            buildConfigField "String", "REPOSITORY", "com.barbasdev.realmexample.weather.repository.WeatherRepository.Factory.TYPE_REALM"
+        }
+    }
+
     dataBinding {
         enabled = true
     }
@@ -36,6 +49,8 @@ dependencies {
     })
 
     compile "com.android.support:appcompat-v7:$support_library_version"
+    compile "com.android.support:cardview-v7:$support_library_version"
+    compile "com.android.support:recyclerview-v7:$support_library_version"
     compile "com.android.support.constraint:constraint-layout:$constraintlayout_version"
 
     kapt "com.android.databinding:compiler:$gradle_version"

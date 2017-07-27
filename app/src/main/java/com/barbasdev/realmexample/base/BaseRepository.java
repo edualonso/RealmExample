@@ -16,6 +16,11 @@ public abstract class BaseRepository<T> {
 
     protected T apiService;
 
+    /**
+     * Constructor for a repository that uses a Retrofit service for network calls.
+     * @param url
+     * @param serviceClass
+     */
     public BaseRepository(String url, Class serviceClass) {
         OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
         if (BuildConfig.DEBUG) {

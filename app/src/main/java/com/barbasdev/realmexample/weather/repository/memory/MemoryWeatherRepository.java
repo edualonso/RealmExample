@@ -1,6 +1,7 @@
-package com.barbasdev.realmexample.datalayer;
+package com.barbasdev.realmexample.weather.repository.memory;
 
-import com.barbasdev.realmexample.datamodel.WeatherResult;
+import com.barbasdev.realmexample.weather.datamodel.WeatherResult;
+import com.barbasdev.realmexample.weather.repository.WeatherRepository;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

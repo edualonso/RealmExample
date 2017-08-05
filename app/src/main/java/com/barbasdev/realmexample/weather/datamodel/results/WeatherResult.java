@@ -1,4 +1,4 @@
-package com.barbasdev.realmexample.weather.datamodel;
+package com.barbasdev.realmexample.weather.datamodel.results;
 
 import com.barbasdev.realmexample.weather.repository.realm.RealmWeatherRepository;
 import com.google.gson.annotations.SerializedName;
@@ -10,7 +10,7 @@ import io.realm.annotations.PrimaryKey;
 public class WeatherResult extends RealmObject {
 
     public static final String KEY_ID = "id";
-    public static final String SEARCH_ID = "name";
+    public static final String KEY_NAME = "name";
 
     @SerializedName("coord")
     private Coord coord;

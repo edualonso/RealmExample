@@ -7,7 +7,7 @@ import com.barbasdev.realmexample.base.BaseRepository;
 import com.barbasdev.realmexample.weather.repository.memory.MemoryWeatherRepository;
 import com.barbasdev.realmexample.weather.repository.realm.RealmWeatherRepository;
 import com.barbasdev.realmexample.weather.network.WeatherApiService;
-import com.barbasdev.realmexample.weather.datamodel.WeatherResult;
+import com.barbasdev.realmexample.weather.datamodel.results.WeatherResult;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -22,10 +22,6 @@ import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 
 /**
- * Created by Edu on 25/07/2017.
- */
-
-/**
  * Abstraction to get/delete weather data. It gets weather following a cache-first-network-second
  * pattern. Whenever a request is sent to the network, the results obtained in the response will be
  * saved locally.
@@ -33,7 +29,7 @@ import io.reactivex.schedulers.Schedulers;
 public abstract class WeatherRepository extends BaseRepository<WeatherApiService> {
 
     public static final String URL = "http://api.openweathermap.org/data/2.5/";
-    public static final long CACHE_LIFESPAN_MS = 10000;
+    public static final long CACHE_LIFESPAN_MS = 600000;
 
     private static final String API_KEY = "75805b09ea06260c9eb71391b785f444";
     private static final String TAG = "WeatherRepository";
@@ -43,12 +39,24 @@ public abstract class WeatherRepository extends BaseRepository<WeatherApiService
     }
 
     /**
-     * Fetches a weather result from the repository's datastore.
+     * Search for a weather result by name from the repository's datastore.
      *
      * @param query
      * @return
      */
-    protected abstract ObservableSource<WeatherResult> queryDataStore(String query);
+    protected abstract Observable<WeatherResult> queryDataStoreObservable(String query);
+
+    protected abstract WeatherResult queryDataStore(String query);
+
+    /**
+     * Search for a weather result by name from the repository's datastore.
+     *
+     * @param id
+     * @return
+     */
+    protected abstract Observable<WeatherResult> queryDataStoreObservable(long id);
+
+    protected abstract WeatherResult queryDataStore(long id);
 
     /**
      * It's executed on an IO thread. Remember to close realm once done!
@@ -71,7 +79,7 @@ public abstract class WeatherRepository extends BaseRepository<WeatherApiService
      */
     public Observable<WeatherResult> getWeather(String query) {
         return Observable.concat(
-                queryDataStore(query),
+                queryDataStoreObservable(query),
                 queryApiWithSave(query))
                 .filter(new Predicate<WeatherResult>() {
                     @Override
@@ -93,7 +101,16 @@ public abstract class WeatherRepository extends BaseRepository<WeatherApiService
                 .map(new Function<WeatherResult, WeatherResult>() {
                     @Override
                     public WeatherResult apply(@NonNull WeatherResult weatherResult) throws Exception {
-                        saveToDataStore(weatherResult);
+//                        saveToDataStore(weatherResult);
+
+                        WeatherResult dataStoreResult = queryDataStore(weatherResult.getId());
+                        if (dataStoreResult == null) {
+                            saveToDataStore(weatherResult);
+                        } else {
+                            // TODO: update search dictionary for this id because we already have the item
+                            // ...
+                        }
+
                         return weatherResult;
                     }
                 })

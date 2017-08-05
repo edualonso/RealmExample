@@ -1,4 +1,4 @@
-package com.barbasdev.realmexample.weather.datamodel;
+package com.barbasdev.realmexample.weather.datamodel.results;
 
 import com.google.gson.annotations.SerializedName;
 

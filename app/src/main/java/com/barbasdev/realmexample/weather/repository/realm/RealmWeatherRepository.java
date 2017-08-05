@@ -3,7 +3,7 @@ package com.barbasdev.realmexample.weather.repository.realm;
 import android.util.Log;
 
 import com.barbasdev.realmexample.persistence.RealmHelper;
-import com.barbasdev.realmexample.weather.datamodel.WeatherResult;
+import com.barbasdev.realmexample.weather.datamodel.results.WeatherResult;
 import com.barbasdev.realmexample.weather.repository.WeatherRepository;
 
 import java.util.Locale;
@@ -23,17 +23,25 @@ public class RealmWeatherRepository extends WeatherRepository {
     }
 
     @Override
-    protected Observable<WeatherResult> queryDataStore(String query) {
-        WeatherResult weatherResultRealmProxy = queryWeather(query);
-        if (weatherResultRealmProxy != null) {
-            String message = String.format(Locale.getDefault(), "Thread: %s, queryDataStore: successful with update time %d", Thread.currentThread().getName(), weatherResultRealmProxy.getUpdateTime());
-            Log.d(TAG, message);
-            return Observable.just(weatherResultRealmProxy);
-        } else {
-            String message = String.format(Locale.getDefault(), "Thread: %s, queryDataStore: got no result", Thread.currentThread().getName());
-            Log.d(TAG, message);
-            return Observable.empty();
-        }
+    protected Observable<WeatherResult> queryDataStoreObservable(String query) {
+        WeatherResult weatherResultRealmProxy = queryWeatherByName(query);
+        return emitWeatherResultObservable(weatherResultRealmProxy);
+    }
+
+    @Override
+    protected WeatherResult queryDataStore(String query) {
+        return queryWeatherByName(query);
+    }
+
+    @Override
+    protected Observable<WeatherResult> queryDataStoreObservable(long id) {
+        WeatherResult weatherResultRealmProxy = queryWeatherById(id);
+        return emitWeatherResultObservable(weatherResultRealmProxy);
+    }
+
+    @Override
+    protected WeatherResult queryDataStore(long id) {
+        return queryWeatherById(id);
     }
 
     @Override
@@ -64,8 +72,30 @@ public class RealmWeatherRepository extends WeatherRepository {
      * @param query
      * @return
      */
-    private WeatherResult queryWeather(String query) {
+    private WeatherResult queryWeatherByName(String query) {
         Realm realm = RealmHelper.getRealmInstance(Thread.currentThread().getId());
-        return realm.where(WeatherResult.class).equalTo(WeatherResult.SEARCH_ID, query).findFirst();
+        return realm.where(WeatherResult.class).equalTo(WeatherResult.KEY_NAME, query).findFirst();
+    }
+
+    /**
+     * It's executed on the main thread. No need to close realm!
+     * @param id
+     * @return
+     */
+    private WeatherResult queryWeatherById(long id) {
+        Realm realm = RealmHelper.getRealmInstance(Thread.currentThread().getId());
+        return realm.where(WeatherResult.class).equalTo(WeatherResult.KEY_ID, id).findFirst();
+    }
+
+    private Observable<WeatherResult> emitWeatherResultObservable(WeatherResult weatherResultRealmProxy) {
+        if (weatherResultRealmProxy != null) {
+            String message = String.format(Locale.getDefault(), "Thread: %s, queryDataStoreObservable: successful with update time %d", Thread.currentThread().getName(), weatherResultRealmProxy.getUpdateTime());
+            Log.d(TAG, message);
+            return Observable.just(weatherResultRealmProxy);
+        } else {
+            String message = String.format(Locale.getDefault(), "Thread: %s, queryDataStoreObservable: got no result", Thread.currentThread().getName());
+            Log.d(TAG, message);
+            return Observable.empty();
+        }
     }
 }

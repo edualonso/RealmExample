@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.barbasdev.realmexample.BuildConfig;
 import com.barbasdev.realmexample.weather.repository.WeatherRepository;
-import com.barbasdev.realmexample.weather.datamodel.WeatherResult;
+import com.barbasdev.realmexample.weather.datamodel.results.WeatherResult;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

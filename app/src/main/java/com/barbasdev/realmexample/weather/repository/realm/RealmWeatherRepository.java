@@ -27,9 +27,9 @@ public class RealmWeatherRepository extends WeatherRepository {
     protected Observable<WeatherResult> queryDataStoreObservable(String query) {
         WeatherResult weatherResultRealmProxy = queryWeatherByName(query);
         if (weatherResultRealmProxy == null) {
-            WeatherResult weatherResultByQuery = queryDictionaryByName(query);
-            if (weatherResultByQuery != null) {
-                weatherResultRealmProxy = weatherResultByQuery;
+            WeatherResult weatherResultFromDictionary = queryDictionaryByName(query);
+            if (weatherResultFromDictionary != null) {
+                weatherResultRealmProxy = weatherResultFromDictionary;
             }
         }
         return emitWeatherResultObservable(weatherResultRealmProxy);
@@ -49,6 +49,12 @@ public class RealmWeatherRepository extends WeatherRepository {
     @Override
     protected WeatherResult queryDataStore(long id) {
         return queryWeatherById(id);
+    }
+
+    @Override
+    protected WeatherResult extractDataStoreResult(WeatherResult dataStoreResult) {
+        Realm realm = RealmHelper.getRealmInstance(Thread.currentThread().getId());
+        return realm.copyFromRealm(dataStoreResult);
     }
 
     @Override

@@ -17,7 +17,7 @@ public class MemoryWeatherRepository extends WeatherRepository {
     private static final String TAG = "MemoryWeatherRepository";
 
     private Map<String, WeatherResult> weatherResults = new LinkedHashMap<>();
-    private Map<String, Integer> searchDictionary = new LinkedTreeMap<>();
+    private Map<String, Long> searchDictionary = new LinkedTreeMap<>();
 
     public MemoryWeatherRepository(String url) {
         super(url);
@@ -26,22 +26,45 @@ public class MemoryWeatherRepository extends WeatherRepository {
     @Override
     protected Observable<WeatherResult> queryDataStoreObservable(String query) {
         WeatherResult item = weatherResults.get(query);
-        return Observable.just(item == null ? new WeatherResult() : item);
+        if (item == null) {
+            WeatherResult itemFromDictionary = queryDictionaryByName(query);
+            if (itemFromDictionary != null) {
+                return Observable.just(itemFromDictionary);
+            }
+            return Observable.empty();
+        } else {
+            return Observable.just(item);
+        }
     }
 
     @Override
     protected WeatherResult queryDataStore(String name) {
-        throw new RuntimeException("Not implemented");
+        return weatherResults.get(name);
     }
 
     @Override
     protected Observable<WeatherResult> queryDataStoreObservable(long id) {
-        throw new RuntimeException("Not implemented");
+        WeatherResult weatherResult = queryDataStore(id);
+        if (weatherResult != null) {
+            return Observable.just(weatherResult);
+        } else {
+            return Observable.empty();
+        }
     }
 
     @Override
     protected WeatherResult queryDataStore(long id) {
-        throw new RuntimeException("Not implemented");
+        for (WeatherResult weatherResult : weatherResults.values()) {
+            if (weatherResult.getId().equals(id)) {
+                return weatherResult;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    protected WeatherResult extractDataStoreResult(WeatherResult dataStoreResult) {
+        return dataStoreResult;
     }
 
     @Override
@@ -51,7 +74,9 @@ public class MemoryWeatherRepository extends WeatherRepository {
 
     @Override
     protected void updateSearchDictionary(long id, String query) {
-        throw new RuntimeException("Not implemented");
+        if (searchDictionary.get(query) == null) {
+            searchDictionary.put(query, id);
+        }
     }
 
     @Override
@@ -61,6 +86,16 @@ public class MemoryWeatherRepository extends WeatherRepository {
 
     @Override
     public void deleteDictionary() {
-        throw new RuntimeException("Not implemented");
+        searchDictionary.clear();
+    }
+
+    private WeatherResult queryDictionaryByName(String query) {
+        Long id = searchDictionary.get(query);
+        for (WeatherResult weatherResult : weatherResults.values()) {
+            if (weatherResult.getId().equals(id)) {
+                return weatherResult;
+            }
+        }
+        return null;
     }
 }

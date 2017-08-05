@@ -4,7 +4,6 @@ import android.support.annotation.StringDef;
 import android.util.Log;
 
 import com.barbasdev.realmexample.base.BaseRepository;
-import com.barbasdev.realmexample.persistence.RealmHelper;
 import com.barbasdev.realmexample.weather.datamodel.results.WeatherResult;
 import com.barbasdev.realmexample.weather.network.WeatherApiService;
 import com.barbasdev.realmexample.weather.repository.memory.MemoryWeatherRepository;
@@ -21,7 +20,6 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
 
 /**
  * Abstraction to get/delete weather data. It gets weather following a cache-first-network-second
@@ -59,6 +57,16 @@ public abstract class WeatherRepository extends BaseRepository<WeatherApiService
     protected abstract Observable<WeatherResult> queryDataStoreObservable(long id);
 
     protected abstract WeatherResult queryDataStore(long id);
+
+    /**
+     * Depending on the type of this repository, the actual result might be either
+     * the real result, or a Realm Proxy. In case of being a proxy, it has to be
+     * copied from the database.
+     *
+     * @param dataStoreResult
+     * @return
+     */
+    protected abstract WeatherResult extractDataStoreResult(WeatherResult dataStoreResult);
 
     /**
      * It's executed on an IO thread. Remember to close realm once done!
@@ -122,8 +130,7 @@ public abstract class WeatherRepository extends BaseRepository<WeatherApiService
                             // first time querying this name: store it
                             saveToDataStore(weatherResult);
                         } else {
-                            Realm realm = RealmHelper.getRealmInstance(Thread.currentThread().getId());
-                            weatherResult = realm.copyFromRealm(dataStoreResult);
+                            weatherResult = extractDataStoreResult(dataStoreResult);
                         }
 
                         // update search dictionary for this query because we already have the item

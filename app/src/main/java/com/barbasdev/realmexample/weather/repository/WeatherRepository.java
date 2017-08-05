@@ -4,10 +4,11 @@ import android.support.annotation.StringDef;
 import android.util.Log;
 
 import com.barbasdev.realmexample.base.BaseRepository;
+import com.barbasdev.realmexample.persistence.RealmHelper;
+import com.barbasdev.realmexample.weather.datamodel.results.WeatherResult;
+import com.barbasdev.realmexample.weather.network.WeatherApiService;
 import com.barbasdev.realmexample.weather.repository.memory.MemoryWeatherRepository;
 import com.barbasdev.realmexample.weather.repository.realm.RealmWeatherRepository;
-import com.barbasdev.realmexample.weather.network.WeatherApiService;
-import com.barbasdev.realmexample.weather.datamodel.results.WeatherResult;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -20,6 +21,7 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
 
 /**
  * Abstraction to get/delete weather data. It gets weather following a cache-first-network-second
@@ -66,10 +68,24 @@ public abstract class WeatherRepository extends BaseRepository<WeatherApiService
     protected abstract void saveToDataStore(WeatherResult weatherResult);
 
     /**
+     * Updates the search dictionary by adding a key-value pair to the data store.
+     *
+     * @param id
+     * @param query
+     */
+    protected abstract void updateSearchDictionary(long id, String query);
+
+    /**
      * Deletes all weather data present in the database. It's executed on the main thread.
-     * No need to close realm!
+     * No need to close realm as it is always executed on the main thread!
      */
     public abstract void deleteWeather();
+
+    /**
+     * Deletes the search dictionary.
+     * No need to close realm as it is always executed on the main thread!
+     */
+    public abstract void deleteDictionary();
 
     /**
      * This method fetches the weather either locally or from the network (if the cache is expired)
@@ -91,25 +107,27 @@ public abstract class WeatherRepository extends BaseRepository<WeatherApiService
                         return usable;
                     }
                 })
-                .first(new WeatherResult())
+                .firstOrError()
                 .toObservable();
     }
 
-    private Observable<WeatherResult> queryApiWithSave(String query) {
+    private Observable<WeatherResult> queryApiWithSave(final String query) {
         return queryApi(query)
                 .subscribeOn(Schedulers.io())
                 .map(new Function<WeatherResult, WeatherResult>() {
                     @Override
                     public WeatherResult apply(@NonNull WeatherResult weatherResult) throws Exception {
-//                        saveToDataStore(weatherResult);
-
                         WeatherResult dataStoreResult = queryDataStore(weatherResult.getId());
                         if (dataStoreResult == null) {
+                            // first time querying this name: store it
                             saveToDataStore(weatherResult);
                         } else {
-                            // TODO: update search dictionary for this id because we already have the item
-                            // ...
+                            Realm realm = RealmHelper.getRealmInstance(Thread.currentThread().getId());
+                            weatherResult = realm.copyFromRealm(dataStoreResult);
                         }
+
+                        // update search dictionary for this query because we already have the item
+                        updateSearchDictionary(weatherResult.getId(), query);
 
                         return weatherResult;
                     }

@@ -2,6 +2,7 @@ package com.barbasdev.realmexample.weather.repository.memory;
 
 import com.barbasdev.realmexample.weather.datamodel.results.WeatherResult;
 import com.barbasdev.realmexample.weather.repository.WeatherRepository;
+import com.google.gson.internal.LinkedTreeMap;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -9,13 +10,14 @@ import java.util.Map;
 import io.reactivex.Observable;
 
 /**
- * Created by Edu on 26/07/2017.
+ * Memory repository. Used for quick access to data.
  */
 public class MemoryWeatherRepository extends WeatherRepository {
 
     private static final String TAG = "MemoryWeatherRepository";
 
     private Map<String, WeatherResult> weatherResults = new LinkedHashMap<>();
+    private Map<String, Integer> searchDictionary = new LinkedTreeMap<>();
 
     public MemoryWeatherRepository(String url) {
         super(url);
@@ -48,7 +50,17 @@ public class MemoryWeatherRepository extends WeatherRepository {
     }
 
     @Override
+    protected void updateSearchDictionary(long id, String query) {
+        throw new RuntimeException("Not implemented");
+    }
+
+    @Override
     public void deleteWeather() {
         weatherResults.clear();
+    }
+
+    @Override
+    public void deleteDictionary() {
+        throw new RuntimeException("Not implemented");
     }
 }

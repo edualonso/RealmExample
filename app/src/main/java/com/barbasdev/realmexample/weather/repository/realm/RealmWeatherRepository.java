@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.barbasdev.realmexample.persistence.RealmHelper;
 import com.barbasdev.realmexample.weather.datamodel.results.WeatherResult;
+import com.barbasdev.realmexample.weather.datamodel.search.SearchDictionary;
 import com.barbasdev.realmexample.weather.repository.WeatherRepository;
 
 import java.util.Locale;
@@ -25,6 +26,12 @@ public class RealmWeatherRepository extends WeatherRepository {
     @Override
     protected Observable<WeatherResult> queryDataStoreObservable(String query) {
         WeatherResult weatherResultRealmProxy = queryWeatherByName(query);
+        if (weatherResultRealmProxy == null) {
+            WeatherResult weatherResultByQuery = queryDictionaryByName(query);
+            if (weatherResultByQuery != null) {
+                weatherResultRealmProxy = weatherResultByQuery;
+            }
+        }
         return emitWeatherResultObservable(weatherResultRealmProxy);
     }
 
@@ -57,13 +64,47 @@ public class RealmWeatherRepository extends WeatherRepository {
     }
 
     @Override
+    protected void updateSearchDictionary(long id, String query) {
+        Realm realm = RealmHelper.getRealmInstance(Thread.currentThread().getId());
+
+        SearchDictionary searchDictionary = realm.where(SearchDictionary.class).equalTo(SearchDictionary.KEY_QUERY, query).findFirst();
+        String message;
+        if (searchDictionary == null) {
+            searchDictionary = new SearchDictionary();
+            searchDictionary.setQuery(query);
+            searchDictionary.setId(id);
+
+            realm.beginTransaction();
+            realm.copyToRealmOrUpdate(searchDictionary);
+            realm.commitTransaction();
+            RealmHelper.closeRealmInstance(Thread.currentThread().getId());
+
+            message = String.format(Locale.getDefault(), "Thread: %s, updated dictionary for query '%s' and id %d.", Thread.currentThread().getName(), query, id);
+        } else {
+            message = String.format(Locale.getDefault(), "Thread: %s, dictionary not update as the query '%s' already exists for id %d.", Thread.currentThread().getName(), query, id);
+        }
+        Log.d(TAG, message);
+    }
+
+    @Override
     public void deleteWeather() {
         Realm realm = RealmHelper.getRealmInstance(Thread.currentThread().getId());
         realm.beginTransaction();
         realm.delete(WeatherResult.class);
         realm.commitTransaction();
 
-        String message = String.format(Locale.getDefault(), "Thread: %s, deleted all data.", Thread.currentThread().getName());
+        String message = String.format(Locale.getDefault(), "Thread: %s, deleted weather results.", Thread.currentThread().getName());
+        Log.d(TAG, message);
+    }
+
+    @Override
+    public void deleteDictionary() {
+        Realm realm = RealmHelper.getRealmInstance(Thread.currentThread().getId());
+        realm.beginTransaction();
+        realm.delete(SearchDictionary.class);
+        realm.commitTransaction();
+
+        String message = String.format(Locale.getDefault(), "Thread: %s, deleted search dictionary.", Thread.currentThread().getName());
         Log.d(TAG, message);
     }
 
@@ -85,6 +126,15 @@ public class RealmWeatherRepository extends WeatherRepository {
     private WeatherResult queryWeatherById(long id) {
         Realm realm = RealmHelper.getRealmInstance(Thread.currentThread().getId());
         return realm.where(WeatherResult.class).equalTo(WeatherResult.KEY_ID, id).findFirst();
+    }
+
+    private WeatherResult queryDictionaryByName(String query) {
+        Realm realm = RealmHelper.getRealmInstance(Thread.currentThread().getId());
+        SearchDictionary searchDictionary = realm.where(SearchDictionary.class).equalTo(SearchDictionary.KEY_QUERY, query).findFirst();
+        if (searchDictionary != null) {
+            return realm.where(WeatherResult.class).equalTo(WeatherResult.KEY_ID, searchDictionary.getId()).findFirst();
+        }
+        return null;
     }
 
     private Observable<WeatherResult> emitWeatherResultObservable(WeatherResult weatherResultRealmProxy) {

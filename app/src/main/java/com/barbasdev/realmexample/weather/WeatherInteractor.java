@@ -3,12 +3,13 @@ package com.barbasdev.realmexample.weather;
 import android.util.Log;
 
 import com.barbasdev.realmexample.BuildConfig;
-import com.barbasdev.realmexample.weather.repository.WeatherRepository;
 import com.barbasdev.realmexample.weather.datamodel.results.WeatherResult;
+import com.barbasdev.realmexample.weather.repository.WeatherRepository;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -29,7 +30,6 @@ public class WeatherInteractor implements WeatherContracts.Interactor {
     private SimpleDateFormat simpleDateFormat;
     private Disposable getWeatherDisposable;
 
-    @SuppressWarnings("WrongConstant")
     public WeatherInteractor(WeatherContracts.ViewModelCallback viewModelCallback) {
         this.viewModelCallback = viewModelCallback;
         weatherRepository = WeatherRepository.Factory.build(BuildConfig.REPOSITORY);
@@ -40,6 +40,8 @@ public class WeatherInteractor implements WeatherContracts.Interactor {
     public void getWeather(String query) {
         viewModelCallback.setText("LOADING...");
         weatherRepository.getWeather(query)
+                .debounce(500, TimeUnit.MILLISECONDS)
+                .throttleFirst(500, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(getWeatherObserver);
     }
@@ -47,6 +49,7 @@ public class WeatherInteractor implements WeatherContracts.Interactor {
     @Override
     public void deleteWeather() {
         weatherRepository.deleteWeather();
+        weatherRepository.deleteDictionary();
         viewModelCallback.setText("DATA DELETED");
     }
 
